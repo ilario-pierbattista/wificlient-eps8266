@@ -2,31 +2,22 @@
 #include "SoftwareSerial.h"
 
 #define RFID_RESET_PIN 2
-#define RFID_RX_PIN 11
-#define RFID_TX_PIN 12
+#define RFID_RX_PIN 6
+#define RFID_TX_PIN 7
 #define RFID_BPS 9600
 
-#define SERIAL_BPS 115200
-
-#define DEBUG_RX_PIN 6
-#define DEBUG_TX_PIN 7
-#define SERIAL_DEBUG 4800
+#define SERIAL_BPS 9600
 
 struct RFIDCode {
     byte code[6];
     byte checksum;
 };
 
-void rfid_read_callback(RFIDCode rfid_code);
-
-
 SoftwareSerial rfidSerial(RFID_RX_PIN, RFID_TX_PIN);
-// SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
 
 void setup() {
     Serial.begin(SERIAL_BPS);
     rfidSerial.begin(RFID_BPS);
-    // debugSerial.begin(SERIAL_DEBUG);
 
     pinMode(RFID_RESET_PIN, OUTPUT);
     digitalWrite(RFID_RESET_PIN, HIGH);
@@ -36,8 +27,6 @@ void loop() {
     RFIDCode rfid;
 
     byte val = 0;
-    // byte code[6];
-    // byte checksum = 0;
     byte bytesread = 0;
     byte tempbyte = 0;
     RFIDCode result_code;
@@ -77,7 +66,7 @@ void loop() {
         // Output to Serial:
 
         if (bytesread == 12) {
-            rfid_read_callback(result_code);
+            Serial.print(code2string(result_code.code, 5)+ ";");
             // Serial.print("5-byte code: ");
             // for (i = 0; i < 5; i++) {
             //    if (code[i] < 16) Serial.print("0");
@@ -94,10 +83,6 @@ void loop() {
         bytesread = 0;
     }
 }
-}
-
-void rfid_read_callback(RFIDCode rfid_code) {
-    Serial.println(code2string(rfid_code.code, 5));
 }
 
 /**
