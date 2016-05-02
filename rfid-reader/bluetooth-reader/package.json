@@ -1,0 +1,15 @@
+{
+  "name": "bluetooth-reader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluetooth-serial-port": "^1.2.6",
+    "exit": "^0.1.2"
+  }
+}
