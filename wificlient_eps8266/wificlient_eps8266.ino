@@ -8,12 +8,12 @@
 
 #define SERIAL_BPS 115200
 
-#define DEBUG_RX_PIN 9
-#define DEBUG_TX_PIN 10
-#define SERIAL_DEBUG 19200
+#define DEBUG_RX_PIN 6
+#define DEBUG_TX_PIN 7
+#define SERIAL_DEBUG 4800
 
 SoftwareSerial rfidSerial(RFID_RX_PIN, RFID_TX_PIN);
-SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
+// SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
 
 /**
 * Conversione ASCII (esadecimale) - intero
@@ -25,9 +25,7 @@ int ascii2hex(char v);
 void setup() {
     Serial.begin(SERIAL_BPS);
     rfidSerial.begin(RFID_BPS);
-    debugSerial.begin(SERIAL_DEBUG);
-
-    debugSerial.print("MANNAGGIAACRISTO\n");
+    // debugSerial.begin(SERIAL_DEBUG);
 
     pinMode(RFID_RESET_PIN, OUTPUT);
     digitalWrite(RFID_RESET_PIN, HIGH);
@@ -75,18 +73,18 @@ void loop() {
             // Output to Serial:
 
             if (bytesread == 12) {                          // if 12 digit read is complete
-                debugSerial.print("5-byte code: ");
-                for (i = 0; i < 5; i++) {
-                    if (code[i] < 16) debugSerial.print("0");
-                    debugSerial.print(code[i], HEX);
-                    debugSerial.print(" ");
-                }
-                debugSerial.println();
+               Serial.println(code2string(code, 5));
+                // Serial.print("5-byte code: ");
+                // for (i = 0; i < 5; i++) {
+                //    if (code[i] < 16) Serial.print("0");
+                //    Serial.print(code[i], HEX);
+                // }
+                // Serial.println();
 
-                debugSerial.print("Checksum: ");
-                debugSerial.print(code[5], HEX);
-                debugSerial.println(code[5] == checksum ? " -- passed." : " -- error.");
-                debugSerial.println();
+                // Serial.print("Checksum: ");
+                // Serial.print(code[5], HEX);
+                // Serial.println(code[5] == checksum ? " -- passed." : " -- error.");
+                // Serial.println();
             }
 
             bytesread = 0;
@@ -101,4 +99,12 @@ int ascii2hex(char val) {
         val = (char) 10 + val - 'A';
     }
     return val;
+}
+
+String code2string(byte code[], int length) {
+  String result = "";
+  for(int i = 0; i < length; i++) {
+    result += String(code[i], HEX);
+  }
+  return result;
 }
