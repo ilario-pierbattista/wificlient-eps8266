@@ -20,10 +20,10 @@ btSerial.on('found', function(address,name){
         btSerial.on('data', function(buffer) {
           var piece = buffer.toString("utf-8");
           global_buffer += piece.replace(/(\r\n|\n\r|\n|\r)/gm,"");
-          if(piece.indexOf("\n") > -1 && piece.indexOf("\r") > -1) {
+          if(piece.indexOf(";") > -1) {
             console.log(global_buffer);
 
-            // @TODO inviare la richiesta al server
+            //@TODO inviare la richiesta al server
 
             global_buffer = "";
           }
