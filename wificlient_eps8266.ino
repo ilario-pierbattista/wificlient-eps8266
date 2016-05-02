@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+#include "SoftwareSerial/SoftwareSerial.h"
 
 #define RFID_RESET_PIN 2
 #define RFID_RX_PIN 11
@@ -8,7 +8,12 @@
 
 #define SERIAL_BPS 115200
 
+#define DEBUG_RX_PIN 9
+#define DEBUG_TX_PIN 10
+#define SERIAL_DEBUG 19200
+
 SoftwareSerial rfidSerial(RFID_RX_PIN, RFID_TX_PIN);
+// SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
 
 /**
 * Conversione ASCII (esadecimale) - intero
@@ -17,10 +22,12 @@ SoftwareSerial rfidSerial(RFID_RX_PIN, RFID_TX_PIN);
 */
 int ascii2hex(char v);
 
-
 void setup() {
     Serial.begin(SERIAL_BPS);
     rfidSerial.begin(RFID_BPS);
+    // debugSerial.begin(SERIAL_DEBUG);
+
+    // debugSerial.print("MANNAGGIAACRISTO\n");
 
     pinMode(RFID_RESET_PIN, OUTPUT);
     digitalWrite(RFID_RESET_PIN, HIGH);
