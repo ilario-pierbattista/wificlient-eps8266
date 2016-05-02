@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "SoftwareSerial/SoftwareSerial.h"
+#include "SoftwareSerial.h"
 
 #define RFID_RESET_PIN 2
 #define RFID_RX_PIN 11
@@ -13,7 +13,7 @@
 #define SERIAL_DEBUG 19200
 
 SoftwareSerial rfidSerial(RFID_RX_PIN, RFID_TX_PIN);
-// SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
+SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
 
 /**
 * Conversione ASCII (esadecimale) - intero
@@ -25,9 +25,9 @@ int ascii2hex(char v);
 void setup() {
     Serial.begin(SERIAL_BPS);
     rfidSerial.begin(RFID_BPS);
-    // debugSerial.begin(SERIAL_DEBUG);
+    debugSerial.begin(SERIAL_DEBUG);
 
-    // debugSerial.print("MANNAGGIAACRISTO\n");
+    debugSerial.print("MANNAGGIAACRISTO\n");
 
     pinMode(RFID_RESET_PIN, OUTPUT);
     digitalWrite(RFID_RESET_PIN, HIGH);
@@ -75,18 +75,18 @@ void loop() {
             // Output to Serial:
 
             if (bytesread == 12) {                          // if 12 digit read is complete
-                Serial.print("5-byte code: ");
+                debugSerial.print("5-byte code: ");
                 for (i = 0; i < 5; i++) {
-                    if (code[i] < 16) Serial.print("0");
-                    Serial.print(code[i], HEX);
-                    Serial.print(" ");
+                    if (code[i] < 16) debugSerial.print("0");
+                    debugSerial.print(code[i], HEX);
+                    debugSerial.print(" ");
                 }
-                Serial.println();
+                debugSerial.println();
 
-                Serial.print("Checksum: ");
-                Serial.print(code[5], HEX);
-                Serial.println(code[5] == checksum ? " -- passed." : " -- error.");
-                Serial.println();
+                debugSerial.print("Checksum: ");
+                debugSerial.print(code[5], HEX);
+                debugSerial.println(code[5] == checksum ? " -- passed." : " -- error.");
+                debugSerial.println();
             }
 
             bytesread = 0;
