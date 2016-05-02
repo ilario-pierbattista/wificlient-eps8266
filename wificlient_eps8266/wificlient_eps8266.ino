@@ -12,15 +12,16 @@
 #define DEBUG_TX_PIN 7
 #define SERIAL_DEBUG 4800
 
+struct RFIDCode {
+    byte code[6];
+    byte checksum;
+};
+
+void rfid_read_callback(RFIDCode rfid_code);
+
+
 SoftwareSerial rfidSerial(RFID_RX_PIN, RFID_TX_PIN);
 // SoftwareSerial debugSerial(DEBUG_RX_PIN, DEBUG_TX_PIN);
-
-/**
-* Conversione ASCII (esadecimale) - intero
-* @param  char v        Carattere
-* @return int           Valore intero
-*/
-int ascii2hex(char v);
 
 void setup() {
     Serial.begin(SERIAL_BPS);
@@ -32,12 +33,15 @@ void setup() {
 }
 
 void loop() {
-    byte i = 0;
+    RFIDCode rfid;
+
     byte val = 0;
-    byte code[6];
-    byte checksum = 0;
+    // byte code[6];
+    // byte checksum = 0;
     byte bytesread = 0;
     byte tempbyte = 0;
+    RFIDCode result_code;
+    result_code.checksum = 0;
 
     if (rfidSerial.available() > 0) {
         if ((val = rfidSerial.read()) == 2) {                  // check for header
@@ -46,7 +50,7 @@ void loop() {
                 if (rfidSerial.available() > 0) {
                     val = rfidSerial.read();
                     if ((val == 0x0D) || (val == 0x0A) || (val == 0x03) ||
-                        (val == 0x02)) { // if header or stop bytes before the 10 digit reading
+                    (val == 0x02)) { // if header or stop bytes before the 10 digit reading
                         break;                                    // stop reading
                     }
 
@@ -57,41 +61,50 @@ void loop() {
                     if (bytesread & 1 == 1) {
                         // make some space for this hex-digit by
                         // shifting the previous hex-digit with 4 bits to the left:
-                        code[bytesread >> 1] = (val | (tempbyte << 4));
+                        result_code.code[bytesread >> 1] = (val | (tempbyte << 4));
 
                         if (bytesread >> 1 != 5) {                // If we're at the checksum byte,
-                            checksum ^= code[bytesread >> 1];       // Calculate the checksum... (XOR)
-                        };
-                    } else {
-                        tempbyte = val;                           // Store the first hex digit first...
+                        result_code.checksum ^= result_code.code[bytesread >> 1];       // Calculate the checksum... (XOR)
                     };
+                } else {
+                    tempbyte = val;                           // Store the first hex digit first...
+                };
 
-                    bytesread++;                                // ready to read next digit
-                }
+                bytesread++;                                // ready to read next digit
             }
-
-            // Output to Serial:
-
-            if (bytesread == 12) {                          // if 12 digit read is complete
-               Serial.println(code2string(code, 5));
-                // Serial.print("5-byte code: ");
-                // for (i = 0; i < 5; i++) {
-                //    if (code[i] < 16) Serial.print("0");
-                //    Serial.print(code[i], HEX);
-                // }
-                // Serial.println();
-
-                // Serial.print("Checksum: ");
-                // Serial.print(code[5], HEX);
-                // Serial.println(code[5] == checksum ? " -- passed." : " -- error.");
-                // Serial.println();
-            }
-
-            bytesread = 0;
         }
+
+        // Output to Serial:
+
+        if (bytesread == 12) {
+            rfid_read_callback(result_code);
+            // Serial.print("5-byte code: ");
+            // for (i = 0; i < 5; i++) {
+            //    if (code[i] < 16) Serial.print("0");
+            //    Serial.print(code[i], HEX);
+            // }
+            // Serial.println();
+
+            // Serial.print("Checksum: ");
+            // Serial.print(code[5], HEX);
+            // Serial.println(code[5] == checksum ? " -- passed." : " -- error.");
+            // Serial.println();
+        }
+
+        bytesread = 0;
     }
 }
+}
 
+void rfid_read_callback(RFIDCode rfid_code) {
+    Serial.println(code2string(rfid_code.code, 5));
+}
+
+/**
+* Conversione ASCII (esadecimale) - intero
+* @param  char v        Carattere
+* @return int           Valore intero
+*/
 int ascii2hex(char val) {
     if ((val >= '0') && (val <= '9')) {
         val = val - '0';
@@ -101,10 +114,16 @@ int ascii2hex(char val) {
     return val;
 }
 
+/**
+* Converte un array di byte nella sua rappresentazione esadecimale
+* @param  {[type]} byte code[]        [description]
+* @param  {[type]} int  length        [description]
+* @return {[type]}      [description]
+*/
 String code2string(byte code[], int length) {
-  String result = "";
-  for(int i = 0; i < length; i++) {
-    result += String(code[i], HEX);
-  }
-  return result;
+    String result = "";
+    for(int i = 0; i < length; i++) {
+        result += String(code[i], HEX);
+    }
+    return result;
 }
